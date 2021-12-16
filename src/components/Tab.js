@@ -5,10 +5,11 @@ import SubTab from 'components/SubTab.js';
 
 const Tab = ({data, onClickHandler, active}) => {
   const activeClass = active ? 'active' : 'inactive';
-  const [activeSubTab, updateActiveSubTab] = useState(1);
+  const defaultSubTabID = data.subtabs?.[0]?.id;
+  const [activeSubTab, updateActiveSubTab] = useState(defaultSubTabID);
 
   useEffect(() => {
-    updateActiveSubTab(1)
+    updateActiveSubTab(defaultSubTabID)
   }, [active])
   
   return (

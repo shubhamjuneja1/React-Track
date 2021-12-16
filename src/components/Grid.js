@@ -1,16 +1,17 @@
 import { useState } from 'react';
 
-// Actions
-import { fetchGridData } from 'actions/fetch-grid-data.js';
+import { tabsData } from 'constants.js';
 
 // Components
 import Tab from 'components/Tab.js';
 
 const Grid = () => {
-  const [activeTab, updateActiveTab] = useState(1);
+  const data = tabsData;
+  const defaultTabID = data[0]?.id;
+  const [activeTab, updateActiveTab] = useState(defaultTabID);
   return (
     <ul>
-      {fetchGridData().tabs?.map(tabData => (
+      {data.map(tabData => (
         <li key={tabData.id}>
           <Tab
             data={tabData}
