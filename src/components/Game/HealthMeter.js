@@ -1,10 +1,8 @@
-const HealthMeter = (props) => {
-  return (
-    <>
-      <div className="font-weight-bold"> {props.name} </div>
-      <div> {props.health} </div>
-    </>
-  );
-};
+const HealthMeter = ({name, health}) => (
+  <>
+    <div className="font-weight-bold"> {name} </div>
+    <div> {health} </div>
+  </>
+);
 
 export default HealthMeter;

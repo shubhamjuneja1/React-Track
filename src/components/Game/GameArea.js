@@ -1,20 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import ActionButtons from 'components/Game/ActionButtons';
-import History from 'components/Game/History';
+import GameHistory from 'components/Game/GameHistory';
 import HealthMeter from "components/Game/HealthMeter";
-
-const PLAYER_ATTACK_MIN_PERCENTAGE = 1;
-const PLAYER_ATTACK_MAX_PERCENTAGE = 10;
-const MONSTER_ATTACK_MIN_PERCENTAGE = 1;
-const MONSTER_ATTACK_MAX_PERCENTAGE = 10;
-const SPECIAL_ATTACK_MIN_PERCENTAGE = 11;
-const SPECIAL_ATTACK_MAX_PERCENTAGE = 20;
-const SPECIAL_ATTACK_MIN_HEALTH = 90;
-const PLAYER_HEAL_PERCENTAGE = 10;
-const GAME_OVER_HEALTH = 0;
+import { PLAYER_ATTACK_MIN_PERCENTAGE, PLAYER_ATTACK_MAX_PERCENTAGE, 
+  MONSTER_ATTACK_MIN_PERCENTAGE, MONSTER_ATTACK_MAX_PERCENTAGE, 
+  SPECIAL_ATTACK_MIN_PERCENTAGE, SPECIAL_ATTACK_MAX_PERCENTAGE, 
+  SPECIAL_ATTACK_MIN_HEALTH, PLAYER_HEAL_PERCENTAGE, 
+  GAME_OVER_HEALTH, ATTACK_KEY, 
+  HEAL_KEY, PLAYER_KEY, ENEMY_KEY } from 'components/Game/constants';
 
 const GameArea = (() => {
+
   const gameState = {
     player: 100,
     enemy: 100,
@@ -25,15 +22,15 @@ const GameArea = (() => {
     movesLog: []
   };
   
-  const randomNumber = ((min, max) => {
+  const getRandomNumber = ((min, max) => {
     return Math.floor(Math.random() * (max - min)) + min;
   });
 
-  const historyMessage = ((actionDoneBy, damage, actionType="attack") => {
-    if(actionType == "heal") {
+  const generateHistoryMessage = ((actionDoneBy, damage, actionType = ATTACK_KEY) => {
+    if(actionType == HEAL_KEY) {
       return `Player heals for ${damage}`;
     }
-    if(actionDoneBy == "player") {
+    if(actionDoneBy == PLAYER_KEY) {
       return `Player hits monster for ${damage}`;
     }
     return `Monster hits player for ${damage}`;
@@ -42,29 +39,33 @@ const GameArea = (() => {
   const [currentGameState, updateGameState] = useState(gameState);
   const [currentHistoryState, updateHistoryState] = useState(historyState);
 
-  const updatePlayerHealth = ((health, attackType = "attack") => {
+  const updatePlayerHealth = ((health, attackType = ATTACK_KEY) => {
     updateHealth(
-      "player",
+      PLAYER_KEY,
       health,
       attackType
     );
-    setHistoryMessage("player", health, attackType);
+    setHistoryMessage(ENEMY_KEY, health, attackType);
   });
+
+  useEffect(() => {
+    isGameOver()
+  }, [currentGameState.player, currentGameState.player]);
 
   const updateEnemyHealth = ((health) => {
     updateHealth(
-      "enemy",
+      ENEMY_KEY,
       health,
     );
-    setHistoryMessage("enemy", health);
+    setHistoryMessage(PLAYER_KEY, health);
   });
 
   const setHistoryMessage = ((actionDoneBy, health, attackType) => {
-    updateHistoryState((previousSate) => (
+    updateHistoryState(({movesLog}) => (
       {
         movesLog: [
-          ...previousSate.movesLog,
-          { message: historyMessage(actionDoneBy, health, attackType) }
+          ...movesLog,
+          { message: generateHistoryMessage(actionDoneBy, health, attackType) }
         ]
       }));
   });
@@ -75,39 +76,36 @@ const GameArea = (() => {
         {
         ...previousSate,
         [attacker]: currentGameState[attacker] + health
-      }), 
-      () => {
-        isGameOver();
-      }
+      })
     );
   });
 
-  const playerAttackHandler = (() => {
-    updateEnemyHealth(-randomNumber(PLAYER_ATTACK_MIN_PERCENTAGE, PLAYER_ATTACK_MAX_PERCENTAGE));
-    updatePlayerHealth(-randomNumber(MONSTER_ATTACK_MIN_PERCENTAGE, MONSTER_ATTACK_MAX_PERCENTAGE));
+  const onAttack = (() => {
+    updateEnemyHealth(-getRandomNumber(PLAYER_ATTACK_MIN_PERCENTAGE, PLAYER_ATTACK_MAX_PERCENTAGE));
+    updatePlayerHealth(-getRandomNumber(MONSTER_ATTACK_MIN_PERCENTAGE, MONSTER_ATTACK_MAX_PERCENTAGE));
   });
 
   const isGameOver = (() => {
     if (currentGameState.player < GAME_OVER_HEALTH || currentGameState.enemy < GAME_OVER_HEALTH) {
-      giveUpHandler();
+      onGiveUp();
     }
   });
 
-  const playerSpecialAttackHandler = (() => {
+  const onSpecialAttack = (() => {
     if(currentGameState.player > SPECIAL_ATTACK_MIN_HEALTH) {
-      updateEnemyHealth(-randomNumber(SPECIAL_ATTACK_MIN_PERCENTAGE, SPECIAL_ATTACK_MAX_PERCENTAGE, "special_attack"));
-      updatePlayerHealth(-randomNumber(MONSTER_ATTACK_MIN_PERCENTAGE, MONSTER_ATTACK_MAX_PERCENTAGE));
+      updateEnemyHealth(-getRandomNumber(SPECIAL_ATTACK_MIN_PERCENTAGE, SPECIAL_ATTACK_MAX_PERCENTAGE, "special_attack"));
+      updatePlayerHealth(-getRandomNumber(MONSTER_ATTACK_MIN_PERCENTAGE, MONSTER_ATTACK_MAX_PERCENTAGE));
     } else {
       alert("You don't have sufficient health");
     }
   });
 
-  const healPlayerHandler = (() => {
-    updatePlayerHealth(PLAYER_HEAL_PERCENTAGE, "heal");
-    updatePlayerHealth(-randomNumber(MONSTER_ATTACK_MIN_PERCENTAGE, MONSTER_ATTACK_MAX_PERCENTAGE));
+  const onHeal = (() => {
+    updatePlayerHealth(PLAYER_HEAL_PERCENTAGE, HEAL_KEY);
+    updatePlayerHealth(-getRandomNumber(MONSTER_ATTACK_MIN_PERCENTAGE, MONSTER_ATTACK_MAX_PERCENTAGE));
   });
 
-  const giveUpHandler = (() => {
+  const onGiveUp = (() => {
     alert("Game Over");
     updateGameState(gameState);
   });
@@ -115,13 +113,13 @@ const GameArea = (() => {
   return (
     <div>
       <ActionButtons
-        playerAttack={playerAttackHandler}
-        playerGiveUp={giveUpHandler}
-        playerSpecialAttack={playerSpecialAttackHandler}
-        playerHeal={healPlayerHandler}
+        onAttack={onAttack}
+        onGiveUp={onGiveUp}
+        onSpecialAttack={onSpecialAttack}
+        onHeal={onHeal}
       />
-      <History
-        historyState={currentHistoryState}
+      <GameHistory
+        movesLog={currentHistoryState.movesLog}
       />
       <HealthMeter 
         name="Player" 

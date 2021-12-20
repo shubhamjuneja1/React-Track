@@ -1,9 +1,7 @@
-const Button = (props)=> {
-  return (
-    <button onClick={props.onClickHandler}>
-      {props.text}
-    </button>
-  );
-}
+const Button = ({onClickHandler, children, type})=> (
+  <button className={`btn btn-${type}`} onClick={onClickHandler}>
+    {children}
+  </button>
+);
 
 export default Button;
