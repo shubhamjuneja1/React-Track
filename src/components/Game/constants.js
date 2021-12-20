@@ -1,0 +1,13 @@
+export const PLAYER_ATTACK_MIN_PERCENTAGE = 1;
+export const PLAYER_ATTACK_MAX_PERCENTAGE = 10;
+export const MONSTER_ATTACK_MIN_PERCENTAGE = 1;
+export const MONSTER_ATTACK_MAX_PERCENTAGE = 10;
+export const SPECIAL_ATTACK_MIN_PERCENTAGE = 11;
+export const SPECIAL_ATTACK_MAX_PERCENTAGE = 20;
+export const SPECIAL_ATTACK_MIN_HEALTH = 90;
+export const PLAYER_HEAL_PERCENTAGE = 10;
+export const GAME_OVER_HEALTH = 0;
+export const ATTACK_KEY = "attack";
+export const HEAL_KEY = "heal";
+export const PLAYER_KEY = "player";
+export const ENEMY_KEY = "enemy";
